@@ -19,13 +19,18 @@ namespace App
 		App(App&&) = delete;
 		App& operator=(App&&) = delete;
 
-		const bool Update();
+		bool Update();
+		void Render();
 
 	private:
 		int InitSDL();
 		void CreateWindow();
+		void CreateRenderer();
+		void CreateContext();
 
 		SDL_Window* window_;
+		SDL_Renderer* renderer_;
+		SDL_GLContext context_;
 	};
 }
 #endif //GRAPHICS_PLAYGROUND_APP_H_
