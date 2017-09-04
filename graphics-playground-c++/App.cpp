@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "App.h"
+#include "resources\File.h"
 #include "GL\glew.h"
+
+#include <string>
+#include <vector>
 
 namespace App
 {
@@ -9,13 +13,16 @@ namespace App
 		, renderer_(nullptr)
 		, context_(nullptr)
 	{
-		if (InitSDL() != 0)
-		{
+		if (InitSDL())
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to initialize SDL: %s\n", SDL_GetError());
-		}
+
 		CreateWindow();
 		CreateRenderer();
 		CreateContext();
+
+		// shader compilation
+		CreateVertexShader();
+		CreatePixelShader();
 	}
 
 	App::~App()
@@ -90,7 +97,51 @@ namespace App
 		if (SDL_GL_SetSwapInterval(1) < 0)
 			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Unable to set swap interval to vsync time: %s\n", SDL_GetError());
 
-		//GLuint program = glCreateProgram();
-		//GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	}
+
+	void App::CreateVertexShader()
+	{
+		vertex_shader_ = glCreateShader(GL_VERTEX_SHADER);
+		
+		File vs_file("VertexShader.vs");
+		const char* lockie = vs_file.ReadContent().c_str();
+		glShaderSource(vertex_shader_, 1, &lockie, nullptr);
+
+		glCompileShader(vertex_shader_);
+		GLint isCompiled = 0;
+		glGetShaderiv(vertex_shader_, GL_COMPILE_STATUS, &isCompiled);
+		if (isCompiled == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetShaderiv(vertex_shader_, GL_INFO_LOG_LENGTH, &maxLength);
+			std::vector<GLchar> errorlog(maxLength);
+
+			glGetShaderInfoLog(vertex_shader_, maxLength, &maxLength, &errorlog[0]);
+			printf(&errorlog[0]);
+			glDeleteShader(vertex_shader_);
+		}
+	}
+
+	void App::CreatePixelShader()
+	{
+		pixel_shader_ = glCreateShader(GL_FRAGMENT_SHADER);
+
+		File ps_file("PixelShader.ps");
+
+		const char* lockie = ps_file.ReadContent().c_str();
+		glShaderSource(pixel_shader_, 1, &lockie, nullptr);
+		glCompileShader(pixel_shader_);
+		GLint isCompiled = 0;
+		glGetShaderiv(pixel_shader_, GL_COMPILE_STATUS, &isCompiled);
+		if (isCompiled == GL_FALSE)
+		{
+			GLint max_length = 0;
+			glGetShaderiv(pixel_shader_, GL_INFO_LOG_LENGTH, &max_length);
+			std::vector<GLchar> errorLog(max_length);
+
+			glGetShaderInfoLog(pixel_shader_, max_length, &max_length, &errorLog[0]);
+			printf(&errorLog[0]);
+			glDeleteShader(pixel_shader_);
+		}
 	}
 }
