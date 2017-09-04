@@ -63,7 +63,7 @@ namespace App
 
 	void App::CreateWindow()
 	{
-		window_ = SDL_CreateWindow("First Window", 0, 0, 640, 320, SDL_WINDOW_OPENGL);
+		window_ = SDL_CreateWindow("First Window", 100, 100, 640, 320, SDL_WINDOW_OPENGL);
 
 		if (!window_)
 			SDL_Log("Unable to create window: %s\n", SDL_GetError());
@@ -103,9 +103,10 @@ namespace App
 	{
 		vertex_shader_ = glCreateShader(GL_VERTEX_SHADER);
 		
-		File vs_file("VertexShader.vs");
-		const char* lockie = vs_file.ReadContent().c_str();
-		glShaderSource(vertex_shader_, 1, &lockie, nullptr);
+		File vs_file("./VertexShader.vs", std::ios_base::in);
+		std::string contents = vs_file.ReadContent();
+		const char* tempContents = contents.c_str();
+		glShaderSource(vertex_shader_, 1, &tempContents, nullptr);
 
 		glCompileShader(vertex_shader_);
 		GLint isCompiled = 0;
@@ -126,10 +127,11 @@ namespace App
 	{
 		pixel_shader_ = glCreateShader(GL_FRAGMENT_SHADER);
 
-		File ps_file("PixelShader.ps");
+		File ps_file("./PixelShader.ps", std::ios_base::in);
 
-		const char* lockie = ps_file.ReadContent().c_str();
-		glShaderSource(pixel_shader_, 1, &lockie, nullptr);
+		std::string contents = ps_file.ReadContent();
+		const char* tempContents = contents.c_str();
+		glShaderSource(pixel_shader_, 1, &tempContents, nullptr);
 		glCompileShader(pixel_shader_);
 		GLint isCompiled = 0;
 		glGetShaderiv(pixel_shader_, GL_COMPILE_STATUS, &isCompiled);
